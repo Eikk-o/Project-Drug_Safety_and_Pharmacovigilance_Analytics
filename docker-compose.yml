@@ -1,0 +1,41 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: pharma_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - pharma_net
+
+  mongo-express:
+    image: mongo-express
+    container_name: pharma_mongo_express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+    depends_on:
+      - mongo
+    networks:
+      - pharma_net
+
+  spark:
+    image: apache/spark-py:v3.4.0
+    container_name: pharma_spark
+    user: root
+    command: ["tail", "-f", "/dev/null"]
+    volumes:
+      - ./spark-app:/opt/spark-app
+      - ./data:/opt/data
+    networks:
+      - pharma_net
+
+networks:
+  pharma_net:
+    driver: bridge
+
+volumes:
+  mongo_data:
